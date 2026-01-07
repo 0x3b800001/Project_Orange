@@ -139,11 +139,12 @@ Copyright (c) 2020 Qv2ray Development Group (@Qv2ray): Design of Translator/Log,
 
 # Project Orange (Beta)
 
-这是前 OI 选手 xyf 做的玩具项目，从 LemonLime 0.3.5 修改而来，使用了了 [LemonLime 一个 fork](https://github.com/Oracynx/LemonLime_Next) 的代码。LemonLime 在 0.3.5 之后停止了对静态编译版本的支持，且有几个想要实现的功能，因此有这样一个项目。目前有的新功能：
+这是前 OI 选手 xyf 做的玩具项目，从 LemonLime 0.3.5 修改而来，使用了 [LemonLime 一个 fork](https://github.com/Oracynx/LemonLime_Next) 的代码。LemonLime 在 0.3.5 之后停止了对 Linux 下 Qt5 版本（即可以不安装依赖直接运行的版本）的支持，且有几个想要实现的功能，因此有这样一个项目。目前有的新功能：
 
 - 自定义校验器修改：不再使用可执行文件的 Lemon 型自定义校验器，而是转向使用标准 testlib.h 的 checker，并且在评测时编译。现在只需要在选择自定义校验器模式后指定校验器的 cpp 文件而不是可执行文件即可。
 - 运行时传入参数：传入的第一个参数会指定打开的比赛文件。
-- 保留了静态编译的 Linux 可执行文件。
+- 保留了可以不安装依赖直接运行的 Linux 可执行文件。
+- 删除了一个不可用的 MacOS 版本。
 - 修改了图标，不再与 LemonLime 共享配置文件，默认代码长度限制改为 100kB，默认题目开启子文件夹。
 
 以后会实现的功能：
