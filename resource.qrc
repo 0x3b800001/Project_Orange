@@ -2,6 +2,9 @@
     <qresource prefix="/logo">
         <file alias="splash2.png">assets/pics/splash2.png</file>
     </qresource>
+    <qresource prefix="/testlib">
+        <file alias="testlib.h">assets/testlib/testlib.h</file>
+    </qresource>
     <qresource prefix="/asset">
         <file>makespec/VERSION</file>
         <file>makespec/VERSIONSUFFIX</file>

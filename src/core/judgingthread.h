@@ -35,6 +35,7 @@ class JudgingThread : public QThread {
 	void setFullScore(int);
 	void setTimeLimit(int);
 	void setMemoryLimit(int);
+	void setSpecialJudgeExecutable(const QString &);
 	int getTimeUsed() const;
 	int getMemoryUsed() const;
 	int getScore() const;
@@ -43,6 +44,7 @@ class JudgingThread : public QThread {
 	ResultState getResult() const;
 	const QString &getMessage() const;
 	bool getNeedRejudge() const;
+	const QString &getSpecialJudgeExecutable() const;
 	void run();
 
   private:
@@ -59,6 +61,7 @@ class JudgingThread : public QThread {
 	QString inputFile;
 	QString outputFile;
 	QString diffPath;
+  QString specialJudgeExecutable;
 	Task *task{};
 	int specialJudgeTimeLimit{};
 	int fullScore{};

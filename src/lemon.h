@@ -31,6 +31,7 @@ class LemonLime : public QMainWindow {
 	void closeEvent(QCloseEvent *);
 	int getSplashTime();
 	void welcome();
+  void openFileOnStartup(const QString& filePath);
 
   private:
 	Ui::LemonLime *ui;

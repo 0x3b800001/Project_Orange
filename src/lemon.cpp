@@ -130,6 +130,22 @@ void LemonLime::closeEvent(QCloseEvent * /*event*/) {
 
 auto LemonLime::getSplashTime() -> int { return settings->getSplashTime(); }
 
+void LemonLime::openFileOnStartup(const QString& filePath) {
+	// Check if file exists and is readable
+	QFileInfo fileInfo(filePath);
+	if (!fileInfo.exists() || !fileInfo.isReadable()) {
+		QMessageBox::warning(this, tr("Error"),
+			tr("Cannot open file %1").arg(filePath), QMessageBox::Close);
+		// Fall back to welcome dialog if file cannot be opened
+		welcome();
+		return;
+	}
+
+	// Try to load the contest file
+	loadContest(filePath);
+}
+// from https://github.com/Oracynx/LemonLime_Next
+
 void LemonLime::welcome() {
 	if (settings->getCompilerList().empty()) {
 		auto *wizard = new AddCompilerWizard(this);

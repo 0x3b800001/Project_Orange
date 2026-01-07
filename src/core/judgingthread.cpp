@@ -442,6 +442,9 @@ void JudgingThread::compareRealNumbers(const QString &contestantOutput) {
 	fclose(standardOutputFile);
 }
 
+void JudgingThread::setSpecialJudgeExecutable(const QString & S) { specialJudgeExecutable = S; }
+const QString &JudgingThread::getSpecialJudgeExecutable() const { return specialJudgeExecutable; }
+
 void JudgingThread::specialJudge(const QString &fileName) {
 	if (! QFileInfo::exists(inputFile)) {
 		score = 0;
@@ -466,10 +469,10 @@ void JudgingThread::specialJudge(const QString &fileName) {
 
 	auto judge = std::make_unique<QProcess>(this);
 	QStringList arguments;
-	arguments << inputFile << fileName << outputFile << QString("%1").arg(fullScore);
-	arguments << workingDirectory + "_score";
-	arguments << workingDirectory + "_message";
-	judge->start(Settings::dataPath() + task->getSpecialJudge(), arguments);
+	arguments << inputFile << fileName << outputFile;
+  judge->setStandardOutputFile(QProcess::nullDevice());
+  judge->setStandardErrorFile(workingDirectory + "_message");
+	judge->start(getSpecialJudgeExecutable(), arguments);
 
 	if (! judge->waitForStarted(-1)) {
 		score = 0;
@@ -477,11 +480,9 @@ void JudgingThread::specialJudge(const QString &fileName) {
 		return;
 	}
 
-	QFile scoreFile(workingDirectory + "_score");
 	QFile messageFile(workingDirectory + "_message");
 
 	auto removeTempFiles = qScopeGuard([&] {
-		scoreFile.remove();
 		messageFile.remove();
 	});
 
@@ -512,40 +513,37 @@ void JudgingThread::specialJudge(const QString &fileName) {
 		return;
 	}
 
-	if (judge->exitCode() != 0) {
+	if (! messageFile.open(QFile::ReadOnly)) {
 		score = 0;
 		result = SpecialJudgeRunTimeError;
 		return;
 	}
 
-	if (! scoreFile.open(QFile::ReadOnly)) {
+	QTextStream messageStream(&messageFile);
+	if (messageStream.status() == QTextStream::ReadCorruptData) {
 		score = 0;
-		result = InvalidSpecialJudge;
+		result = SpecialJudgeRunTimeError;
 		return;
 	}
-
-	QTextStream scoreStream(&scoreFile);
-	scoreStream >> score;
-
-	if (scoreStream.status() == QTextStream::ReadCorruptData) {
-		score = 0;
-		result = InvalidSpecialJudge;
-		return;
-	}
-
-	scoreFile.close();
-
-	if (score < 0) {
-		score = 0;
-		result = InvalidSpecialJudge;
-		return;
-	}
-
-	if (messageFile.open(QFile::ReadOnly)) {
-		QTextStream messageStream(&messageFile);
-		message = messageStream.readAll();
-		messageFile.close();
-	}
+  QString token;
+	messageStream >> token;
+  if (token == "ok") {
+    score = fullScore;
+  } else if (token == "points") {
+    double points;
+    messageStream >> points;
+    if (points < 0) {
+      score = 0;
+      result = InvalidSpecialJudge;
+      return;
+    }
+    score = fullScore * points;
+  } else {
+    message = "Result not ok/points: " + token;
+    score = 0;
+  }
+  message.append(messageStream.readAll());
+  messageFile.close();
 
 	if (score == 0)
 		result = WrongAnswer;

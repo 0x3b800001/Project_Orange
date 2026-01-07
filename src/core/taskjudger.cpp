@@ -16,6 +16,40 @@
 #include "core/task.h"
 #include "core/testcase.h"
 
+ 
+#include <QFile>
+#include <QDir>
+#include <QFileInfo>
+
+bool extractTestlib(const QString &destDir) {
+	QDir dir(destDir);
+	if (! dir.exists() && ! dir.mkpath(".")) {
+		return false;
+	}
+	QFile resourceFile(":/testlib/testlib.h");
+	if (! resourceFile.open(QIODevice::ReadOnly)) {
+		return false;
+	}
+	QByteArray fileData = resourceFile.readAll();
+	resourceFile.close();
+
+	QString destFilePath = QDir(destDir).filePath("testlib.h");
+	QFile destFile(destFilePath);
+
+	if (! destFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+		return false;
+	}
+
+	bool success = (destFile.write(fileData) == fileData.size());
+	destFile.close();
+
+	if (! success) {
+		QFile::remove(destFilePath);
+	}
+
+	return success;
+}
+
 #include <QSysInfo>
 #include <QTimer>
 #include <QtMath>
@@ -358,6 +392,91 @@ int TaskJudger::judge() {
 		if (! traditionalTaskPrepare())
 			return 1;
 
+  QString specialJudgeExecutable;
+  if (task->getComparisonMode() == Task::SpecialJudgeMode) {
+	  QDir(QDir::toNativeSeparators(temporaryDir.path()) + QDir::separator()).mkdir("_testlib.checker.dir_");
+	  QFile::copy(Settings::dataPath() + task->getSpecialJudge(),
+		          QDir::toNativeSeparators(temporaryDir.path()) + QDir::separator() +
+		              "_testlib.checker.dir_" + QDir::separator() + "chk.cpp");
+    if (!extractTestlib(QDir::toNativeSeparators(temporaryDir.path()) + QDir::separator() +
+		              "_testlib.checker.dir_" + QDir::separator())) {
+      compileState = CompileError;
+      compileMessage = "No testlib.";
+    }
+
+	  QList<Compiler *> compilerList = settings->getCompilerList();
+	  Compiler *cppCompiler = nullptr;
+	  for (auto *compiler : compilerList) {
+		  if (compiler->getCompilerName() == "gcc" || compiler->getCompilerName() == "g++" ||
+			  compiler->getCompilerName().contains("cpp")) {
+			  cppCompiler = compiler;
+			  break;
+		  }
+	  }
+
+	  if (!cppCompiler) {
+      compileState = InvalidCompiler;
+		  return 1;
+	  }
+
+    QProcess compilerProcess;
+    compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
+    compilerProcess.setProcessEnvironment(environment);
+    compilerProcess.setWorkingDirectory(QDir::toNativeSeparators(temporaryDir.path()) + QDir::separator() + "_testlib.checker.dir_");
+
+    compilerProcess.start(cppCompiler->getCompilerLocation(),
+                          QString("-o chk chk.cpp -O2 -std=c++14").split(QLatin1Char(' '), Qt::SkipEmptyParts));
+
+    if (! compilerProcess.waitForStarted(-1)) {
+      compileState = InvalidCompiler;
+      return 1;
+    }
+
+    QElapsedTimer timer;
+    timer.start();
+    bool flag = false;
+
+    while (timer.elapsed() < settings->getCompileTimeLimit()) {
+      if (compilerProcess.state() != QProcess::Running) {
+        flag = true;
+        break;
+      }
+
+      QCoreApplication::processEvents();
+
+      if (! isJudging) {
+        compilerProcess.kill();
+        return false;
+      }
+      QThread::msleep(10);
+    }
+
+    if (! flag) {
+      compilerProcess.kill();
+      compileState = CompileTimeLimitExceeded;
+      return 1;
+    } else if (compilerProcess.exitCode() != 0) {
+      compileState = CompileError;
+      compileMessage = QString::fromLocal8Bit(compilerProcess.readAllStandardOutput().constData());
+      return 1;
+    } else {
+      if (QDir(QDir::toNativeSeparators(temporaryDir.path()) + QDir::separator() +
+                "_testlib.checker.dir_")
+              .entryList()
+              .empty()) {
+        compileState = InvalidCompiler;
+        return 1;
+      } else {
+        compileState = CompileSuccessfully;
+        specialJudgeExecutable = QDir::toNativeSeparators(temporaryDir.path()) + QDir::separator() +
+		              "_testlib.checker.dir_" + QDir::separator() + "chk";
+        #ifdef Q_OS_WIN32
+          specialJudgeExecutable.append(".exe");
+        #endif
+      }
+    }
+  }
+
 	for (int i = 0; i < task->getTestCaseList().size(); i++) {
 		timeUsed.append(QList<int>());
 		memoryUsed.append(QList<int>());
@@ -422,6 +541,7 @@ int TaskJudger::judge() {
 			}
 
 			auto *thread = new JudgingThread();
+      thread->setSpecialJudgeExecutable(specialJudgeExecutable);
 			thread->setExtraTimeRatio(settings->getDefaultExtraTimeRatio());
 			QString workingDirectory =
 			    QDir::toNativeSeparators(QDir(QDir::toNativeSeparators(temporaryDir.path()) +

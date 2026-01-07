@@ -17,7 +17,8 @@
 TaskEditWidget::TaskEditWidget(QWidget *parent) : QWidget(parent), ui(new Ui::TaskEditWidget) {
 	ui->setupUi(this);
 	editTask = nullptr;
-	ui->specialJudge->setFilters(QDir::Files | QDir::Executable);
+	ui->specialJudge->setFilters(QDir::Files);
+	ui->specialJudge->setFileExtensions({"cpp"});
 	ui->interactorPath->setFilters(QDir::Files);
 	ui->graderPath->setFilters(QDir::Files);
 	connect(this, &TaskEditWidget::dataPathChanged, ui->specialJudge, &FileLineEdit::refreshFileList);
