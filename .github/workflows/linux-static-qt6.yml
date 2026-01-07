@@ -1,20 +1,10 @@
 name: Linux Static Qt6
 
 on:
-  # push代码时触发workflow
   push:
-    # 忽略README.md
-    paths-ignore:
-      - "README.md"
-      - "LICENSE"
-      - "BUILD.md"
-  # pull_request时触发workflow
+    paths-ignore: ["README.md", "LICENSE", "BUILD.md"]
   pull_request:
-    # 忽略README.md
-    paths-ignore:
-      - "README.md"
-      - "LICENSE"
-      - "BUILD.md"
+    paths-ignore: ["README.md", "LICENSE", "BUILD.md"]
   release:
     types: [published]
 
@@ -22,7 +12,6 @@ jobs:
   check_commit_msg:
     outputs:
       commit_message: ${{ steps.get_message.outputs.message }}
-    name: Check if the workflow has been disabled.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,68 +19,95 @@ jobs:
         id: get_message
         run: |
           echo "message=$(git log --format=%B -n 1 ${{ github.event.after }})" >> $GITHUB_OUTPUT
+
   linux:
     strategy:
       fail-fast: false
       matrix:
         build_type: [Release, RelWithDebInfo]
-
     needs: check_commit_msg
-    if: ${{ !contains( needs.check_commit_msg.outputs.commit_message, 'NO_DEB') }}
-    name: Linux Static ${{ matrix.build_type }}
+    if: ${{ !contains(needs.check_commit_msg.outputs.commit_message, 'NO_DEB') }}
+    name: Linux Static Qt6 ${{ matrix.build_type }}
     runs-on: ubuntu-latest
     container: ubuntu:20.04
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       TZ: Asia/Shanghai
       DEBIAN_FRONTEND: noninteractive
-
+      QT_DIR: ${{ github.workspace }}/qt6  # 明确定义Qt6安装路径
+    
     steps:
+      # 关键修复1: 第一步安装所有基础工具 (无sudo!)
+      - name: Install base tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git wget ca-certificates curl tar
+          rm -rf /var/lib/apt/lists/*
+
       - name: Get the version
         id: get_version
         shell: bash
-        run: |
-          echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
-          apt update
-          apt install -y git
-      - name: Checking out sources
+        run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: "recursive"
+          submodules: "recursive"  # 现在Git已安装，可正常使用
+
+      # 关键修复2: 合并所有依赖安装 (无sudo + 清理缓存)
       - name: Install build dependencies
         run: |
-          apt update
-          apt install -y build-essential ninja-build cmake pkgconf bash
-          apt install -y libgl1-mesa-dev libglu1-mesa-dev
-          apt install -y libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev  libxcb-xinerama0-dev libxkbcommon-dev libxkbcommon-x11-dev
-          apt install -y libharfbuzz-dev libsm-dev libdrm-dev
-          apt install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
-      - name: Install Qt
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            build-essential ninja-build cmake pkgconf bash \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev \
+            libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev \
+            libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev \
+            libxcb-sync0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev \
+            libxcb-render-util0-dev libxcb-xinerama0-dev libxkbcommon-dev \
+            libxkbcommon-x11-dev libharfbuzz-dev libsm-dev libdrm-dev \
+            libxcb-util-dev libxcb-cursor-dev libxcb-composite0-dev
+          rm -rf /var/lib/apt/lists/*
+
+      # 关键修复3: 正确安装Qt6 (使用--strip-components=1)
+      - name: Install Qt6
         run: |
-          cd ..
-          wget https://github.com/Project-LemonLime/qt5ci/releases/latest/download/qt-6.7-static-linux.tar.gz
-          tar -zxvf qt-6.7-static-linux.tar.gz
+          mkdir -p $QT_DIR
+          wget -q https://github.com/Project-LemonLime/qt5ci/releases/latest/download/qt-6.7-static-linux.tar.gz -O /tmp/qt.tar.gz
+          tar xzf /tmp/qt.tar.gz -C $QT_DIR --strip-components=1
+          rm /tmp/qt.tar.gz  # 清理临时文件
+          # 验证安装
+          ls -l $QT_DIR/bin/qmake
+
+      # 关键修复4: 使用绝对路径构建
       - name: Build
         run: |
-          cd ..
-          mkdir build
-          cd build
-          cmake ../Project_LemonLime -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DLEMON_BUILD_INFO="Build for Linux" -DLEMON_BUILD_EXTRA_INFO="Build on $(uname -sr)" -DCMAKE_PREFIX_PATH=../qt6/bin -DLEMON_QT6=ON
+          mkdir ${{ github.workspace }}/build
+          cd ${{ github.workspace }}/build
+          cmake ${{ github.workspace }}/Project_LemonLime \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DLEMON_BUILD_INFO="Build for Linux (Qt6)" \
+            -DLEMON_BUILD_EXTRA_INFO="Build on $(uname -sr)" \
+            -DCMAKE_PREFIX_PATH=$QT_DIR \  # 指向正确路径
+            -DLEMON_QT6=ON
           cmake --build . --target package --parallel $(nproc)
-          cd ..
-          cd Project_LemonLime
-          cp ../build/lemon ./
+          cp lemon ${{ github.workspace }}/Project_LemonLime/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: LemonLime-linux-qt6-x86_64-${{ matrix.build_type }}
-          path: lemon
+          path: ${{ github.workspace }}/Project_LemonLime/lemon
+
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
-        if: startsWith(github.event.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: lemon
+          file: ${{ github.workspace }}/Project_LemonLime/lemon
           asset_name: LemonLime-linux-qt6-x86_64-${{ matrix.build_type }}
           tag: ${{ github.ref }}
           overwrite: true
