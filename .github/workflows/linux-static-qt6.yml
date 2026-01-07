@@ -69,7 +69,7 @@ jobs:
           cd ..
           mkdir build
           cd build
-          cmake $wd -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DLEMON_BUILD_INFO="Build for Linux" -DLEMON_BUILD_EXTRA_INFO="Build on $(uname -sr)" -DCMAKE_PREFIX_PATH=../qt6/bin
+          cmake $wd -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DLEMON_BUILD_INFO="Build for Linux" -DLEMON_BUILD_EXTRA_INFO="Build on $(uname -sr)" -DCMAKE_PREFIX_PATH=../qt6/bin -DLEMON_QT6=ON
           cmake --build . --target package --parallel $(nproc)
           cd $wd
           cp ../build/lemon ./

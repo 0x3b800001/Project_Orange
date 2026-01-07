@@ -57,7 +57,20 @@ jobs:
           apt install -y libgl1-mesa-dev libglu1-mesa-dev
           apt install -y libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev  libxcb-xinerama0-dev libxkbcommon-dev libxkbcommon-x11-dev
           apt install -y libharfbuzz-dev libsm-dev libdrm-dev
-          apt install -y libspdlog-dev
+          apt install -y --no-install-recommends \
+            build-essential ninja-build cmake pkgconf bash \
+            libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev \
+            libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev \
+            libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev \
+            libxcb-sync0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev \
+            libxcb-render-util0-dev libxcb-xinerama0-dev libxkbcommon-dev \
+            libxkbcommon-x11-dev libharfbuzz-dev libsm-dev libdrm-dev \
+            libjpeg-dev libpng-dev libtiff-dev libgif-dev libwebp-dev \
+            libpulse-dev libasound2-dev libavcodec-dev libavformat-dev libavutil-dev \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libssl-dev libdbus-1-dev libproxy-dev \
+            libicu-dev libxcb-util-dev libxcb-cursor-dev libxcb-composite0-dev \
+            libxcb-present-dev libxcb-sync-dev libxcb-xinput-dev libxcb-xkb-dev
       - name: Install Qt
         run: |
           cd ..
