@@ -65,13 +65,13 @@ jobs:
           tar -zxvf qt-5.15.3-kde-static-linux.tar.gz
       - name: Build
         run: |
+          wd=$(pwd)
           cd ..
           mkdir build
           cd build
-          cmake ../Project_LemonLime -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DLEMON_BUILD_INFO="Build for Linux" -DLEMON_BUILD_EXTRA_INFO="Build on $(uname -sr)" -DCMAKE_PREFIX_PATH=../qt
+          cmake $wd -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DLEMON_BUILD_INFO="Build for Linux" -DLEMON_BUILD_EXTRA_INFO="Build on $(uname -sr)" -DCMAKE_PREFIX_PATH=../qt
           cmake --build . --target package --parallel $(nproc)
-          cd ..
-          cd Project_LemonLime
+          cd $wd
           cp ../build/lemon ./
       - name: Upload artifact
         uses: actions/upload-artifact@v4
