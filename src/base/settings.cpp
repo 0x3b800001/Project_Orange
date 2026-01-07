@@ -415,7 +415,7 @@ void Settings::copyFrom(Settings *other) {
 }
 
 void Settings::saveSettings() {
-	QSettings settings("LemonLime", "lemon");
+	QSettings settings("Orange", "lemon");
 	settings.setValue("UiLanguage", uiLanguage);
 	settings.beginGroup("GeneralSettings");
 	settings.setValue("DefaultFullScore", defaultFullScore);
@@ -519,7 +519,7 @@ void Settings::loadSettings() {
 	compilerList.clear();
 	colorThemeList.clear();
 	recentContest.clear();
-	QSettings settings("LemonLime", "lemon");
+	QSettings settings("Orange", "lemon");
 	uiLanguage = settings.value("UiLanguage", QLocale::system().name()).toString();
 	settings.beginGroup("GeneralSettings");
 	defaultFullScore = settings.value("DefaultFullScore", 10).toInt();
@@ -528,7 +528,7 @@ void Settings::loadSettings() {
 	defaultMemoryLimit = settings.value("DefaultMemoryLimit", 512).toInt();
 	compileTimeLimit = settings.value("CompileTimeLimit", 10000).toInt();
 	specialJudgeTimeLimit = settings.value("SpecialJudgeTimeLimit", 10000).toInt();
-	fileSizeLimit = settings.value("FileSizeLimit", 50).toInt();
+	fileSizeLimit = settings.value("FileSizeLimit", 100).toInt();
 	rejudgeTimes = settings.value("MaximumRejudgeTimes", 1).toInt();
 	maxJudgingThreads = settings.value("MaximumJudgingThreads", 1).toInt();
 	defaultInputFileExtension = settings.value("DefaultInputFileExtension", "in").toString();

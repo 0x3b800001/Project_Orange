@@ -32,7 +32,7 @@ class Task : public QObject {
 	              ComparisonMode comparisonMode = IgnoreSpacesMode,
 	              QString diffArguments = "--ignore-space-change --text --brief", int realPrecision = 3,
 	              bool standardInputCheck = false, bool standardOutputCheck = false,
-	              bool subFolderCheck = false);
+	              bool subFolderCheck = true);
 
 	const QList<TestCase *> &getTestCaseList() const;
 	const QString &getProblemTitle() const;

@@ -1,7 +1,7 @@
 ## 源码下载
 
 ```plain
-$ git clone https://github.com/Project-LemonLime/Project_LemonLime.git --recursive
+$ git clone https://github.com/0x3b800001/Project_Orange.git --recursive
 ```
 
 ### 下载的东西太大了？
@@ -10,11 +10,7 @@ $ git clone https://github.com/Project-LemonLime/Project_LemonLime.git --recursi
 
 ### 如果 Github 还是太慢…
 
-你也许可以到 `码云（Gitee）` 去下载。
-
-在很多地区，从 `码云` 下载的速度是从 `Github` 下载的速度的 100 倍。
-
-[这个仓库在码云下的镜像](https://gitee.com/iotang/Project_LemonLime)
+进行科学的网络使用。
 
 ## Windows
 
@@ -145,3 +141,18 @@ export CMAKE_PREFIX_PATH="/path/to/your/qt"
 cmake -DCMAKE_BUILD_TYPE=Release -GNinja .
 ninja
 ```
+
+## NOI Linux 2.0 静态编译
+
+在 NOI Linux 2.0 下，安装依赖；
+
+```bash
+sudo apt update
+sudo apt install -y build-essential ninja-build cmake pkgconf bash
+sudo apt install -y libgl1-mesa-dev libglu1-mesa-dev
+sudo apt install -y libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync0-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev  libxcb-xinerama0-dev libxkbcommon-dev libxkbcommon-x11-dev
+sudo apt install -y libharfbuzz-dev libsm-dev libdrm-dev
+sudo apt install -y libspdlog-dev
+```
+
+接下来在项目目录下运行 `build.sh`。脚本会在父目录下下载 qt，请注意可以使用科学上网，并确认父目录结构，防止删除你的文件。

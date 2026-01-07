@@ -538,9 +538,36 @@ void JudgingThread::specialJudge(const QString &fileName) {
       return;
     }
     score = fullScore * points;
-  } else {
-    message = "Result not ok/points: " + token;
+  } else if (token == "partially") {
+    int num = -1;
+    auto rest = messageStream.readAll();
+    if (rest.startsWith(" correct (") && rest.indexOf(')') != -1 && rest.indexOf(')') != rest.length() - 1) {
+      bool ok;
+      num = rest.mid(10, rest.indexOf(')') - 10).toInt(&ok);
+      if (!ok) {
+        num = -1;
+      }
+    }
+    if (num < 0) {
+      score = 0;
+      message = "partially" + rest;
+      result = InvalidSpecialJudge;
+      return;
+    }
+    score = fullScore * num / 100;
+    message = rest.mid(rest.indexOf(')') + 2);
+  } else if (token == "FAIL") {
     score = 0;
+    message = messageStream.readAll();
+    result = InvalidSpecialJudge;
+    return;
+  } else if (token == "") {
+    score = 0;
+    result = SpecialJudgeRunTimeError;
+    return;
+  } else {
+    score = 0;
+    messageFile.seek(0);
   }
   message.append(messageStream.readAll());
   messageFile.close();

@@ -94,7 +94,7 @@ LemonLime::LemonLime(QWidget *parent) : QMainWindow(parent), ui(new Ui::LemonLim
 	connect(ui->actionChangeContestName, &QAction::triggered, this, &LemonLime::changeContestName);
 	connect(ui->exitAction, &QAction::triggered, this, &LemonLime::close);
 
-	QSettings settings("LemonLime", "lemon");
+	QSettings settings("Orange", "lemon");
 	QSize _size = settings.value("WindowSize", size()).toSize();
 	resize(_size);
 
@@ -124,7 +124,7 @@ void LemonLime::closeEvent(QCloseEvent * /*event*/) {
 		saveContest(curFile);
 
 	settings->saveSettings();
-	QSettings settings("LemonLime", "lemon");
+	QSettings settings("Orange", "lemon");
 	settings.setValue("WindowSize", size());
 }
 
