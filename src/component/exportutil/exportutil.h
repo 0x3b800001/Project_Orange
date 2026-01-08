@@ -25,6 +25,7 @@ class ExportUtil : public QObject {
   public:
 	explicit ExportUtil(QObject *parent = nullptr);
 	static void exportResult(QWidget *, Contest *);
+	static void exportUoj(QWidget *, Contest *);
 
   private:
 	static QString getContestantHtmlCode(Contest *, Contestant *, int);
@@ -32,6 +33,7 @@ class ExportUtil : public QObject {
 	static void exportHtml(QWidget *, Contest *, const QString &);
 	static void exportSmallerHtml(QWidget *, Contest *, const QString &);
 	static void exportCsv(QWidget *, Contest *, const QString &);
+	static void exportZip(QWidget *, Contest *, const QString &);
 #ifdef ENABLE_XLS_EXPORT
 	static void exportXls(QWidget *, Contest *, const QString &);
 #endif

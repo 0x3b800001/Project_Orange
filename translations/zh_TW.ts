@@ -1708,6 +1708,10 @@ Depends: </source>
         <translation>匯出統計資訊(&amp;S)</translation>
     </message>
     <message>
+        <source>Export UO&amp;J Config</source>
+        <translation>匯出 UOJ 配置(&amp;S)</translation>
+    </message>
+    <message>
         <source>Manual</source>
         <translation>使用者手冊</translation>
     </message>
@@ -2237,8 +2241,12 @@ p, li { white-space: pre-wrap; }
         <translation>HTML文件 (*.html)</translation>
     </message>
     <message>
-        <source>Export Statstics</source>
+        <source>Export Statistics</source>
         <translation>匯出統計資訊</translation>
+    </message>
+    <message>
+        <source>Export UOJ Config</source>
+        <translation>匯出 UOJ 配置</translation>
     </message>
 </context>
 <context>

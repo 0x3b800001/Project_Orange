@@ -75,6 +75,8 @@ add_compile_definitions(SPDLOG_COMPILED_LIB)
 add_compile_definitions(SPDLOG_BUILD_SHARED=OFF)
 set(spdlog_DIR ${CMAKE_SOURCE_DIR}/3rdparty/spdlog)
 add_subdirectory(3rdparty/spdlog)
+add_subdirectory(3rdparty/miniz)
+
 
 if(WIN32)
     add_compile_options("/std:c++17")
@@ -268,7 +270,7 @@ endif()
 
 target_precompile_headers(lemon PUBLIC ${CMAKE_SOURCE_DIR}/src/pch.h)
 
-target_link_libraries(lemon PRIVATE ${LEMON_QT_LIBS} lemon-core lemon-base SingleApplication::SingleApplication spdlog::spdlog)
+target_link_libraries(lemon PRIVATE ${LEMON_QT_LIBS} lemon-core lemon-base SingleApplication::SingleApplication spdlog::spdlog miniz)
 
 if(WIN32 AND NOT LEMON_QT6)
     target_link_libraries(lemon PRIVATE userenv)

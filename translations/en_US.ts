@@ -1683,6 +1683,10 @@ Depends: </source>
         <translation></translation>
     </message>
     <message>
+        <source>Export UO&amp;J Config</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Manual</source>
         <translation></translation>
     </message>
@@ -2206,7 +2210,11 @@ p, li { white-space: pre-wrap; }
         <translation></translation>
     </message>
     <message>
-        <source>Export Statstics</source>
+        <source>Export Statistics</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Export UOJ Config</source>
         <translation></translation>
     </message>
 </context>

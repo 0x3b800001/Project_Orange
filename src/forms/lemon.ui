@@ -500,6 +500,8 @@
     <addaction name="exportAction"/>
     <addaction name="separator"/>
     <addaction name="actionExportStatistics"/>
+    <addaction name="separator"/>
+    <addaction name="actionExportUoj"/>
    </widget>
    <widget class="QMenu" name="toolsMenu">
     <property name="font">
@@ -893,6 +895,18 @@
    </property>
    <property name="text">
     <string>Export &amp;Statistics</string>
+   </property>
+  </action>
+  <action name="actionExportUoj">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/icon/document-export.svg</normaloff>:/icon/document-export.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Export UO&amp;J Config</string>
    </property>
   </action>
   <action name="actionManual">

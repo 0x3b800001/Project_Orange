@@ -1708,6 +1708,10 @@ Depends: </source>
         <translation>导出统计信息(&amp;S)</translation>
     </message>
     <message>
+        <source>Export UO&amp;J Config</source>
+        <translation>导出 UOJ 配置(&amp;J)</translation>
+    </message>
+    <message>
         <source>Manual</source>
         <translation>用户手册</translation>
     </message>
@@ -2225,8 +2229,12 @@ Depends: </source>
         <translation>HTML文档 (*.html)</translation>
     </message>
     <message>
-        <source>Export Statstics</source>
+        <source>Export Statistics</source>
         <translation>导出统计信息</translation>
+    </message>
+    <message>
+        <source>Export UOJ Config</source>
+        <translation>导出 UOJ 信息</translation>
     </message>
     <message>
         <source>Form</source>

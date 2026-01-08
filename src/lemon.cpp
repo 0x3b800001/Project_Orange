@@ -87,7 +87,8 @@ LemonLime::LemonLime(QWidget *parent) : QMainWindow(parent), ui(new Ui::LemonLim
 	connect(ui->closeAction, &QAction::triggered, this, &LemonLime::closeAction);
 	connect(ui->addTasksAction, &QAction::triggered, this, &LemonLime::addTasksAction);
 	connect(ui->exportAction, &QAction::triggered, this, &LemonLime::exportResult);
-	connect(ui->actionExportStatistics, &QAction::triggered, this, &LemonLime::exportStatstics);
+	connect(ui->actionExportStatistics, &QAction::triggered, this, &LemonLime::exportStatistics);
+	connect(ui->actionExportUoj, &QAction::triggered, this, &LemonLime::exportUoj);
 	connect(ui->aboutAction, &QAction::triggered, this, &LemonLime::aboutLemon);
 	connect(ui->actionManual, &QAction::triggered, this, &LemonLime::actionManual);
 	connect(ui->actionMore, &QAction::triggered, this, &LemonLime::actionMore);
@@ -734,6 +735,7 @@ void LemonLime::loadContest(const QString &filePath) {
 	ui->addTasksAction->setEnabled(true);
 	ui->exportAction->setEnabled(true);
 	ui->actionExportStatistics->setEnabled(true);
+	ui->actionExportUoj->setEnabled(true);
 	ui->actionChangeContestName->setEnabled(true);
 	ui->cleanupAction->setEnabled(false);
 	ui->refreshAction->setEnabled(false);
@@ -774,6 +776,7 @@ void LemonLime::newContest(const QString &title, const QString &savingName, cons
 	ui->addTasksAction->setEnabled(true);
 	ui->exportAction->setEnabled(true);
 	ui->actionExportStatistics->setEnabled(true);
+	ui->actionExportUoj->setEnabled(true);
 	ui->actionChangeContestName->setEnabled(true);
 	ui->cleanupAction->setEnabled(false);
 	ui->refreshAction->setEnabled(false);
@@ -810,6 +813,7 @@ void LemonLime::closeAction() {
 	ui->addTasksAction->setEnabled(false);
 	ui->exportAction->setEnabled(false);
 	ui->actionExportStatistics->setEnabled(false);
+	ui->actionExportUoj->setEnabled(false);
 	ui->actionChangeContestName->setEnabled(false);
 	ui->cleanupAction->setEnabled(false);
 	ui->refreshAction->setEnabled(false);
@@ -991,8 +995,9 @@ void LemonLime::addTasksAction() {
 }
 
 void LemonLime::exportResult() { ExportUtil::exportResult(this, curContest); }
+void LemonLime::exportUoj() { ExportUtil::exportUoj(this, curContest); }
 
-void LemonLime::exportStatstics() { StatisticsBrowser::exportStatstics(this, curContest); }
+void LemonLime::exportStatistics() { StatisticsBrowser::exportStatistics(this, curContest); }
 
 void LemonLime::changeContestName() {
 	if (! curContest) {
