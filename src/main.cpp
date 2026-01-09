@@ -91,15 +91,15 @@ int main(int argc, char *argv[]) {
 	w.activateWindow();
 	w.show();
 
-  // Check for command-line arguments to open contest file
-  QStringList arguments = QCoreApplication::arguments();
+	// Check for command-line arguments to open contest file
+	QStringList arguments = QCoreApplication::arguments();
 	if (arguments.size() > 1) {
 		QString filePath = arguments.at(1);
 		w.openFileOnStartup(filePath);
 	} else {
 		w.welcome();
 	}
-  // from https://github.com/Oracynx/LemonLime_Next
+	// from https://github.com/Oracynx/LemonLime_Next
 
 	return app.exec();
 }

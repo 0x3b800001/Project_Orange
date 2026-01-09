@@ -442,7 +442,7 @@ void JudgingThread::compareRealNumbers(const QString &contestantOutput) {
 	fclose(standardOutputFile);
 }
 
-void JudgingThread::setSpecialJudgeExecutable(const QString & S) { specialJudgeExecutable = S; }
+void JudgingThread::setSpecialJudgeExecutable(const QString &S) { specialJudgeExecutable = S; }
 const QString &JudgingThread::getSpecialJudgeExecutable() const { return specialJudgeExecutable; }
 
 void JudgingThread::specialJudge(const QString &fileName) {
@@ -470,8 +470,8 @@ void JudgingThread::specialJudge(const QString &fileName) {
 	auto judge = std::make_unique<QProcess>(this);
 	QStringList arguments;
 	arguments << inputFile << fileName << outputFile;
-  judge->setStandardOutputFile(QProcess::nullDevice());
-  judge->setStandardErrorFile(workingDirectory + "_message");
+	judge->setStandardOutputFile(QProcess::nullDevice());
+	judge->setStandardErrorFile(workingDirectory + "_message");
 	judge->start(getSpecialJudgeExecutable(), arguments);
 
 	if (! judge->waitForStarted(-1)) {
@@ -482,9 +482,7 @@ void JudgingThread::specialJudge(const QString &fileName) {
 
 	QFile messageFile(workingDirectory + "_message");
 
-	auto removeTempFiles = qScopeGuard([&] {
-		messageFile.remove();
-	});
+	auto removeTempFiles = qScopeGuard([&] { messageFile.remove(); });
 
 	QElapsedTimer timer;
 	timer.start();
@@ -525,52 +523,53 @@ void JudgingThread::specialJudge(const QString &fileName) {
 		result = SpecialJudgeRunTimeError;
 		return;
 	}
-  QString token;
+	QString token;
 	messageStream >> token;
-  if (token == "ok") {
-    score = fullScore;
-  } else if (token == "points") {
-    double points;
-    messageStream >> points;
-    if (points < 0) {
-      score = 0;
-      result = InvalidSpecialJudge;
-      return;
-    }
-    score = fullScore * points;
-  } else if (token == "partially") {
-    int num = -1;
-    auto rest = messageStream.readAll();
-    if (rest.startsWith(" correct (") && rest.indexOf(')') != -1 && rest.indexOf(')') != rest.length() - 1) {
-      bool ok;
-      num = rest.mid(10, rest.indexOf(')') - 10).toInt(&ok);
-      if (!ok) {
-        num = -1;
-      }
-    }
-    if (num < 0) {
-      score = 0;
-      message = "partially" + rest;
-      result = InvalidSpecialJudge;
-      return;
-    }
-    score = fullScore * num / 100;
-    message = rest.mid(rest.indexOf(')') + 2);
-  } else if (token == "FAIL") {
-    score = 0;
-    message = messageStream.readAll();
-    result = InvalidSpecialJudge;
-    return;
-  } else if (token == "") {
-    score = 0;
-    result = SpecialJudgeRunTimeError;
-    return;
-  } else {
-    score = 0;
-    messageFile.seek(0);
-  }
-  message.append(messageStream.readAll());
-  messageFile.close();
+	if (token == "ok") {
+		score = fullScore;
+	} else if (token == "points") {
+		double points;
+		messageStream >> points;
+		if (points < 0) {
+			score = 0;
+			result = InvalidSpecialJudge;
+			return;
+		}
+		score = fullScore * points;
+	} else if (token == "partially") {
+		int num = -1;
+		auto rest = messageStream.readAll();
+		if (rest.startsWith(" correct (") && rest.indexOf(')') != -1 &&
+		    rest.indexOf(')') != rest.length() - 1) {
+			bool ok;
+			num = rest.mid(10, rest.indexOf(')') - 10).toInt(&ok);
+			if (! ok) {
+				num = -1;
+			}
+		}
+		if (num < 0) {
+			score = 0;
+			message = "partially" + rest;
+			result = InvalidSpecialJudge;
+			return;
+		}
+		score = fullScore * num / 100;
+		message = rest.mid(rest.indexOf(')') + 2);
+	} else if (token == "FAIL") {
+		score = 0;
+		message = messageStream.readAll();
+		result = InvalidSpecialJudge;
+		return;
+	} else if (token == "") {
+		score = 0;
+		result = SpecialJudgeRunTimeError;
+		return;
+	} else {
+		score = 0;
+		messageFile.seek(0);
+	}
+	message.append(messageStream.readAll());
+	messageFile.close();
 
 	if (score == 0)
 		result = WrongAnswer;
@@ -918,26 +917,14 @@ void JudgingThread::runProgram() {
 	auto *runner = new QProcess(this);
 	QStringList argumentsList;
 
-	argumentsList << "--ro-bind"
-	              << "/usr"
-	              << "/usr";
-	argumentsList << "--symlink"
-	              << "/usr/lib"
-	              << "/lib";
-	argumentsList << "--symlink"
-	              << "/usr/lib64"
-	              << "/lib64";
-	argumentsList << "--symlink"
-	              << "/usr/bin"
-	              << "/bin";
-	argumentsList << "--symlink"
-	              << "/usr/sbin"
-	              << "/sbin";
-	argumentsList << "--tmpfs"
-	              << "/tmp";
+	argumentsList << "--ro-bind" << "/usr" << "/usr";
+	argumentsList << "--symlink" << "/usr/lib" << "/lib";
+	argumentsList << "--symlink" << "/usr/lib64" << "/lib64";
+	argumentsList << "--symlink" << "/usr/bin" << "/bin";
+	argumentsList << "--symlink" << "/usr/sbin" << "/sbin";
+	argumentsList << "--tmpfs" << "/tmp";
 
-	argumentsList << "--unshare-all"
-	              << "--die-with-parent";
+	argumentsList << "--unshare-all" << "--die-with-parent";
 
 	argumentsList << "--chdir" << workingDirectory;
 

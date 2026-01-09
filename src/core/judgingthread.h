@@ -61,7 +61,7 @@ class JudgingThread : public QThread {
 	QString inputFile;
 	QString outputFile;
 	QString diffPath;
-  QString specialJudgeExecutable;
+	QString specialJudgeExecutable;
 	Task *task{};
 	int specialJudgeTimeLimit{};
 	int fullScore{};

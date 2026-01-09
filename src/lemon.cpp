@@ -131,12 +131,11 @@ void LemonLime::closeEvent(QCloseEvent * /*event*/) {
 
 auto LemonLime::getSplashTime() -> int { return settings->getSplashTime(); }
 
-void LemonLime::openFileOnStartup(const QString& filePath) {
+void LemonLime::openFileOnStartup(const QString &filePath) {
 	// Check if file exists and is readable
 	QFileInfo fileInfo(filePath);
-	if (!fileInfo.exists() || !fileInfo.isReadable()) {
-		QMessageBox::warning(this, tr("Error"),
-			tr("Cannot open file %1").arg(filePath), QMessageBox::Close);
+	if (! fileInfo.exists() || ! fileInfo.isReadable()) {
+		QMessageBox::warning(this, tr("Error"), tr("Cannot open file %1").arg(filePath), QMessageBox::Close);
 		// Fall back to welcome dialog if file cannot be opened
 		welcome();
 		return;
@@ -907,8 +906,8 @@ void LemonLime::addTaskWithScoreScale(const QString &title,
 	}
 }
 
-auto LemonLime::compareFileName(const std::pair<QString, QString> &a, const std::pair<QString, QString> &b)
-    -> bool {
+auto LemonLime::compareFileName(const std::pair<QString, QString> &a,
+                                const std::pair<QString, QString> &b) -> bool {
 	return (a.first.length() < b.first.length()) ||
 	       (a.first.length() == b.first.length() && QString::localeAwareCompare(a.first, b.first) < 0);
 }
@@ -942,8 +941,7 @@ void LemonLime::addTasksAction() {
 			filters = settings->getOutputFileExtensions();
 
 			if (filters.isEmpty())
-				filters << "out"
-				        << "ans";
+				filters << "out" << "ans";
 
 			for (int j = 0; j < filters.size(); j++) {
 				filters[j] = QString("*.") + filters[j];

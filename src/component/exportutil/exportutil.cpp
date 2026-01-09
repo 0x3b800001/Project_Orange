@@ -742,34 +742,26 @@ void ExportUtil::exportCsv(QWidget *widget, Contest *contest, const QString &fil
 		loc.insert(contestantList[i], i);
 	}
 
-	out << "\"" << tr("Rank") << "\""
-	    << ","
-	    << "\"" << tr("Name") << "\""
-	    << ",";
+	out << "\"" << tr("Rank") << "\"" << "," << "\"" << tr("Name") << "\"" << ",";
 
 	for (auto &i : taskList) {
-		out << "\"" << i->getProblemTitle() << "\""
-		    << ",";
+		out << "\"" << i->getProblemTitle() << "\"" << ",";
 	}
 
 	out << "\"" << tr("Total Score") << "\"" << Qt::endl;
 
 	for (auto &i : sortList) {
 		Contestant *contestant = contest->getContestant(i.second);
-		out << "\"" << rankList[contestant->getContestantName()] + 1 << "\""
-		    << ",";
-		out << "\"" << i.second << "\""
-		    << ",";
+		out << "\"" << rankList[contestant->getContestantName()] + 1 << "\"" << ",";
+		out << "\"" << i.second << "\"" << ",";
 
 		for (int j = 0; j < taskList.size(); j++) {
 			int score = contestant->getTaskScore(j);
 
 			if (score != -1) {
-				out << "\"" << score << "\""
-				    << ",";
+				out << "\"" << score << "\"" << ",";
 			} else {
-				out << "\"" << tr("Invalid") << "\""
-				    << ",";
+				out << "\"" << tr("Invalid") << "\"" << ",";
 			}
 		}
 
@@ -940,16 +932,20 @@ bool compressFilesToZip(const QString &dir, const QString &zip) {
 		}
 	}
 
-  QDir requireDir(QDir(dir).filePath("require"));
-  if (requireDir.exists()) {
-    for (auto &f : requireDir.entryInfoList(QDir::Files)) {
-      QFile file(f.absoluteFilePath());
-      if (file.open(QIODevice::ReadOnly)) {
-        QByteArray data = file.readAll();
-        mz_zip_writer_add_mem(&z, (std::string("require") + QDir::separator().toLatin1() + f.fileName().toUtf8().constData()).c_str(), data.constData(), data.size(), 9);
-      }
-    }
-  }
+	QDir requireDir(QDir(dir).filePath("require"));
+	if (requireDir.exists()) {
+		for (auto &f : requireDir.entryInfoList(QDir::Files)) {
+			QFile file(f.absoluteFilePath());
+			if (file.open(QIODevice::ReadOnly)) {
+				QByteArray data = file.readAll();
+				mz_zip_writer_add_mem(&z,
+				                      (std::string("require") + QDir::separator().toLatin1() +
+				                       f.fileName().toUtf8().constData())
+				                          .c_str(),
+				                      data.constData(), data.size(), 9);
+			}
+		}
+	}
 
 	bool ok = mz_zip_writer_finalize_archive(&z);
 	mz_zip_writer_end(&z);
@@ -961,26 +957,26 @@ bool compressFilesToZip(const QString &dir, const QString &zip) {
 void ExportUtil::exportZip(QWidget *widget, Contest *contest, const QString &fileName) {
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 	QList<Task *> taskList = contest->getTaskList();
-  
-  QTemporaryDir tempDir;
-  QString tempPath = tempDir.path() + QDir::separator();
-  QString dataPath = QDir::currentPath() + QDir::separator() + "data" + QDir::separator();
-  
-  QString warning;
-  for (qsizetype i = 0; i < taskList.size(); ++i) {
-    auto task = taskList.at(i);
-    QTemporaryDir tempDirTask;
-    QString tempPathTask = tempDirTask.path() + QDir::separator();
-    QFile file(tempPathTask + "problem.conf");
-    if (!file.open(QIODevice::WriteOnly)) {
-      QMessageBox::warning(widget, tr("LemonLime"), tr("Error"), QMessageBox::Ok);
-      QApplication::restoreOverrideCursor();
-      return;
-    }
 
-    QTextStream conf(&file);
-    auto testCaseList = task->getTestCaseList();
-    conf << QString("\
+	QTemporaryDir tempDir;
+	QString tempPath = tempDir.path() + QDir::separator();
+	QString dataPath = QDir::currentPath() + QDir::separator() + "data" + QDir::separator();
+
+	QString warning;
+	for (qsizetype i = 0; i < taskList.size(); ++i) {
+		auto task = taskList.at(i);
+		QTemporaryDir tempDirTask;
+		QString tempPathTask = tempDirTask.path() + QDir::separator();
+		QFile file(tempPathTask + "problem.conf");
+		if (! file.open(QIODevice::WriteOnly)) {
+			QMessageBox::warning(widget, tr("LemonLime"), tr("Error"), QMessageBox::Ok);
+			QApplication::restoreOverrideCursor();
+			return;
+		}
+
+		QTextStream conf(&file);
+		auto testCaseList = task->getTestCaseList();
+		conf << QString("\
 use_builtin_judger on\n\
 n_ex_tests 0\n\
 n_sample_tests 0\n\
@@ -989,62 +985,71 @@ input_pre data\n\
 input_suf in\n\
 output_pre data\n\
 output_suf ans\n\
-n_subtasks %1\n"
-                    ).arg(testCaseList.size());
-    int timeLimit = 0, memoryLimit = 0, top = 0;
-    for (qsizetype j = 0; j < testCaseList.size(); ++j) {
-      auto testCase = testCaseList.at(j);
-      auto inf = testCase->getInputFiles(), ouf = testCase->getOutputFiles();
-      timeLimit = qMax(timeLimit, testCase->getTimeLimit());
-      memoryLimit = qMax(memoryLimit, testCase->getMemoryLimit());
-      for (qsizetype k = 0; k < inf.size(); ++k) {
-        ++top;
-        QFile::copy(dataPath + inf[k], tempPathTask + "data" + QString::number(top) + ".in");
-        QFile::copy(dataPath + ouf[k], tempPathTask + "data" + QString::number(top) + ".ans");
-      }
-      auto dep = testCase->getDependenceSubtask();
-      conf << QString("\
+n_subtasks %1\n")
+		            .arg(testCaseList.size());
+		int timeLimit = 0, memoryLimit = 0, top = 0;
+		for (qsizetype j = 0; j < testCaseList.size(); ++j) {
+			auto testCase = testCaseList.at(j);
+			auto inf = testCase->getInputFiles(), ouf = testCase->getOutputFiles();
+			timeLimit = qMax(timeLimit, testCase->getTimeLimit());
+			memoryLimit = qMax(memoryLimit, testCase->getMemoryLimit());
+			for (qsizetype k = 0; k < inf.size(); ++k) {
+				++top;
+				QFile::copy(dataPath + inf[k], tempPathTask + "data" + QString::number(top) + ".in");
+				QFile::copy(dataPath + ouf[k], tempPathTask + "data" + QString::number(top) + ".ans");
+			}
+			auto dep = testCase->getDependenceSubtask();
+			conf << QString("\
 subtask_end_%1 %2\n\
 subtask_type_%1 %4\n\
-subtask_score_%1 %3\n"
-                     ).arg(j + 1).arg(top).arg(testCase->getFullScore()).arg(dep.empty() ? "min" : "packed");
-      if (!dep.empty()) {
-        conf << QString("subtask_dependence_%1 many\n").arg(j + 1);
-        for (qsizetype k = 0; k < dep.size(); ++k) {
-          conf << QString("subtask_dependence_%1_%2 %3\n").arg(j + 1).arg(k + 1).arg(dep.at(k));
-        }
-      }
-    }
-    conf << QString("\
+subtask_score_%1 %3\n")
+			            .arg(j + 1)
+			            .arg(top)
+			            .arg(testCase->getFullScore())
+			            .arg(dep.empty() ? "min" : "packed");
+			if (! dep.empty()) {
+				conf << QString("subtask_dependence_%1 many\n").arg(j + 1);
+				for (qsizetype k = 0; k < dep.size(); ++k) {
+					conf << QString("subtask_dependence_%1_%2 %3\n").arg(j + 1).arg(k + 1).arg(dep.at(k));
+				}
+			}
+		}
+		conf << QString("\
 n_tests %1\n\
 time_limit %2\n\
-memory_limit %3\n"
-                   ).arg(top).arg((timeLimit + 999) / 1000).arg(memoryLimit);
+memory_limit %3\n")
+		            .arg(top)
+		            .arg((timeLimit + 999) / 1000)
+		            .arg(memoryLimit);
 
-    if (task->getTaskType() == Task::TaskType::Interaction) {
-      conf << "with_implementer on\n";
-      QDir(tempPathTask).mkdir("require");
-      QFile::copy(dataPath + task->getInteractor(), tempPathTask + "require" + QDir::separator() + task->getInteractorName());
-      QFile::copy(dataPath + task->getGrader(), tempPathTask + "require" + QDir::separator() + "implementer.cpp");
-    } else if (task->getTaskType() != Task::TaskType::AnswersOnly) {
-      conf << "submit_answer on\n";
-    } else if (task->getTaskType() != Task::TaskType::Traditional) {
-      warning += QString::number(i + 1) + "-" + task->getSourceFileName() + " not configured completely.\n";
-    }
+		if (task->getTaskType() == Task::TaskType::Interaction) {
+			conf << "with_implementer on\n";
+			QDir(tempPathTask).mkdir("require");
+			QFile::copy(dataPath + task->getInteractor(),
+			            tempPathTask + "require" + QDir::separator() + task->getInteractorName());
+			QFile::copy(dataPath + task->getGrader(),
+			            tempPathTask + "require" + QDir::separator() + "implementer.cpp");
+		} else if (task->getTaskType() != Task::TaskType::AnswersOnly) {
+			conf << "submit_answer on\n";
+		} else if (task->getTaskType() != Task::TaskType::Traditional) {
+			warning +=
+			    QString::number(i + 1) + "-" + task->getSourceFileName() + " not configured completely.\n";
+		}
 
-    if (task->getComparisonMode() == Task::ComparisonMode::LineByLineMode || 
-        task->getComparisonMode() == Task::ComparisonMode::IgnoreSpacesMode ||
-        task->getComparisonMode() == Task::ComparisonMode::ExternalToolMode) {
-      conf << "use_builtin_checker wcmp\n";
-    } else if (task->getComparisonMode() == Task::ComparisonMode::RealNumberMode) {
-      QFile spj(tempPathTask + "chk.cpp");
-      spj.open(QFile::WriteOnly);
-      QTextStream spjout(&spj);
-      spjout << QString(
-R"(#include "testlib.h"
+		if (task->getComparisonMode() == Task::ComparisonMode::LineByLineMode ||
+		    task->getComparisonMode() == Task::ComparisonMode::IgnoreSpacesMode ||
+		    task->getComparisonMode() == Task::ComparisonMode::ExternalToolMode) {
+			conf << "use_builtin_checker wcmp\n";
+		} else if (task->getComparisonMode() == Task::ComparisonMode::RealNumberMode) {
+			QFile spj(tempPathTask + "chk.cpp");
+			spj.open(QFile::WriteOnly);
+			QTextStream spjout(&spj);
+			spjout << QString(
+			              R"(#include "testlib.h"
 #include <cmath>
 using namespace std;
-const double EPS = 1E-)") + QString::number(task->getRealPrecision()) + QString(R"(;
+const double EPS = 1E-)") +
+			              QString::number(task->getRealPrecision()) + QString(R"(;
 int main(int argc, char *argv[]) {
   registerTestlibCmd(argc, argv);
   int n = 0;
@@ -1058,26 +1063,26 @@ int main(int argc, char *argv[]) {
   if (n == 1) quitf(_ok, "found '%.5lf', expected '%.5lf', error '%.5lf'", p, j, doubleDelta(j, p));
   quitf(_ok, "%d numbers", n);
 })");
-      spj.close();
-    } else {
-      QFile::copy(dataPath + task->getSpecialJudge(), tempPathTask + "chk.cpp");
-    }
+			spj.close();
+		} else {
+			QFile::copy(dataPath + task->getSpecialJudge(), tempPathTask + "chk.cpp");
+		}
 
-    file.close();
+		file.close();
 
+		if (! compressFilesToZip(tempPathTask, tempPath + QString::number(i + 1) + "-" +
+		                                           task->getSourceFileName() + ".zip")) {
+			QMessageBox::warning(widget, tr("LemonLime"), tr("Error"), QMessageBox::Ok);
+			QApplication::restoreOverrideCursor();
+			return;
+		}
+	}
 
-    if (!compressFilesToZip(tempPathTask, tempPath + QString::number(i + 1) + "-" + task->getSourceFileName() + ".zip")) {
-      QMessageBox::warning(widget, tr("LemonLime"), tr("Error"), QMessageBox::Ok);
-      QApplication::restoreOverrideCursor();
-      return;
-    }
-  }
-
-  if (!compressFilesToZip(tempPath, fileName)) {
-    QMessageBox::warning(widget, tr("LemonLime"), tr("Error"), QMessageBox::Ok);
-    QApplication::restoreOverrideCursor();
-    return;
-  }
+	if (! compressFilesToZip(tempPath, fileName)) {
+		QMessageBox::warning(widget, tr("LemonLime"), tr("Error"), QMessageBox::Ok);
+		QApplication::restoreOverrideCursor();
+		return;
+	}
 
 	QApplication::restoreOverrideCursor();
 	QMessageBox::information(widget, tr("LemonLime"), tr("Export is done"), QMessageBox::Ok);
@@ -1096,13 +1101,13 @@ void ExportUtil::exportUoj(QWidget *widget, Contest *contest) {
 	QString fileName = QFileDialog::getSaveFileName(
 	    widget, tr("Export as UOJ config"), QDir::currentPath() + QDir::separator() + "uoj.zip", filter);
 
-  if (fileName.isEmpty()) {
-    return;
-  }
+	if (fileName.isEmpty()) {
+		return;
+	}
 
 	if (QFileInfo(fileName).suffix() != "zip") {
 		QMessageBox::warning(widget, tr("LemonLime"), tr("Can only export as zip file"), QMessageBox::Ok);
 		return;
-  }
-  exportZip(widget, contest, fileName);
+	}
+	exportZip(widget, contest, fileName);
 }
