@@ -1025,7 +1025,7 @@ memory_limit %3\n"
       conf << "with_implementer on\n";
       QDir(tempPathTask).mkdir("require");
       QFile::copy(dataPath + task->getInteractor(), tempPathTask + "require" + QDir::separator() + task->getInteractorName());
-      QFile::copy(dataPath + task->getGrader(), tempPathTask + "implementer.cpp");
+      QFile::copy(dataPath + task->getGrader(), tempPathTask + "require" + QDir::separator() + "implementer.cpp");
     } else if (task->getTaskType() != Task::TaskType::AnswersOnly) {
       conf << "submit_answer on\n";
     } else if (task->getTaskType() != Task::TaskType::Traditional) {
