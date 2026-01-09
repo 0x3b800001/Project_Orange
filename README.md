@@ -146,7 +146,8 @@ Copyright (c) 2020 Qv2ray Development Group (@Qv2ray): Design of Translator/Log,
 - 保留了可以不安装依赖直接运行的 Linux 可执行文件。
 - 删除了一个不可用的 MacOS 版本。
 - 修改了图标，不再与 LemonLime 共享配置文件，默认代码长度限制改为 100kB，默认题目开启子文件夹。
+- 导出题目到 uoj 数据格式。
 
 以后会实现的功能：
 
-- 导出题目到 uoj 数据格式。
+- 欢迎建议
